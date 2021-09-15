@@ -1,17 +1,16 @@
-﻿using FlightServiceAPI.DTO;
+﻿using FlightServiceAPI.AOP;
+using FlightServiceAPI.DTO;
 using FlightServiceAPI.Models;
 using FlightServiceAPI.Services;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FlightServiceAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ExceptionHandler]
+    //[Authorize]
     public class FlightController : ControllerBase
     {
         private readonly IFightService flightService;
@@ -63,6 +62,11 @@ namespace FlightServiceAPI.Controllers
         public ActionResult SearchFlight(SearchDTO search)
         {
             return Ok(flightService.SearchFlight(search));
+        }
+        [HttpPost("getAvailableTickets")]
+        public ActionResult GetAvailableTickets(FlightAvailableTicketsDTO flightAvailable)
+        {
+            return Ok(flightService.GetAvailableTickets(flightAvailable));
         }
     }
 }

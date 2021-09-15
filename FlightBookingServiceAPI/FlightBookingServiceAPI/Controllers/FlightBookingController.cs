@@ -1,16 +1,15 @@
-﻿using FlightBookingServiceAPI.DTO;
+﻿using FlightBookingServiceAPI.AOP;
+using FlightBookingServiceAPI.DTO;
 using FlightBookingServiceAPI.Services;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FlightBookingServiceAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ExceptionHandler]
+    //[Authorize]
     public class FlightBookingController : ControllerBase
     {
         private readonly IFlightBookingService flightBookingService;
@@ -56,6 +55,11 @@ namespace FlightBookingServiceAPI.Controllers
         public ActionResult GetBookingHistoryOfUser(string email)
         {
             return Ok(flightBookingService.GetBookingHistoryOfUser(email));
+        }
+        [HttpPost("GetBookedSeats")]
+        public ActionResult GetBookedSeats(BookedTicketsDTO bookedTickets)
+        {
+            return Ok(flightBookingService.GetBookedTicketsSeatNumber(bookedTickets));
         }
 
     }

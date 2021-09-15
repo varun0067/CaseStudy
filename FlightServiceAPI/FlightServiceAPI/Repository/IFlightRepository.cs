@@ -1,21 +1,20 @@
 ﻿using FlightServiceAPI.DTO;
 using FlightServiceAPI.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FlightServiceAPI.Repository
 {
     public interface IFlightRepository
     {
         public List<Airline> GetAllAirlines();
-        public bool AddAirline(Airline airline);
-        public bool BlockAirline(int airlineId);
-        public bool ActivateAirline(int airlineId);
+        public Airline GetAirlineById(int airlineId);
+        public string AddAirline(Airline airline);
+        public string BlockAirline(Airline airline);
+        public string ActivateAirline(Airline airline);
         public List<Flight> GetAllFlightsByAirlineId(int airlineId);
-        public bool AddFlight(Flight flight);
-        public bool DeleteFlight(string flightNumber);
+        public string AddFlight(Flight flight);
+        public string DeleteFlight(Flight flight);
         public List<Flight> SearchFlight(SearchDTO search);
+        public Flight GetFlightByFlightNumber(string flightNumber);
     }
 }

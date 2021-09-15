@@ -1,84 +1,72 @@
-﻿using FlightServiceAPI.DTO;
+﻿using FlightServiceAPI.Context;
+using FlightServiceAPI.DTO;
 using FlightServiceAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace FlightServiceAPI.Repository
 {
     public class FlightRepository : IFlightRepository
     {
-        public List<Airline> Airlines;
-        public List<Flight> Flights;
+        private readonly FlightDbContext flightDbContext;
 
-        public FlightRepository()
+        public FlightRepository(FlightDbContext _flightDbContext)
         {
-            Airlines = new List<Airline>();
-            Flights = new List<Flight>();
+            flightDbContext = _flightDbContext;
         }
-        public bool ActivateAirline(int airlineId)
+        public string ActivateAirline(Airline airline)
         {
-            var airline = Airlines.Where(a => a.Id == airlineId).FirstOrDefault();
-            if (airline != null)
-            {
-                airline.IsActive = true;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            airline.IsActive = true;
+            flightDbContext.SaveChanges();
+            return "Airline Activated";
         }
 
-        public bool AddAirline(Airline airline)
+        public string AddAirline(Airline airline)
         {
-            Airlines.Add(airline);
-            return true;
+            flightDbContext.Airlines.Add(airline);
+            flightDbContext.SaveChanges();
+            return "Airline Added successfully";
         }
 
-        public bool AddFlight(Flight flight)
+        public string AddFlight(Flight flight)
         {
-            Flights.Add(flight);
-            return true;
+            flightDbContext.Flights.Add(flight);
+            flightDbContext.SaveChanges();
+            return "Flight Added successfully";
         }
 
-        public bool BlockAirline(int airlineId)
+        public string BlockAirline(Airline airline)
         {
-            var airline = Airlines.Where(a => a.Id == airlineId).FirstOrDefault();
-            if (airline != null && airline.IsActive == true)
-            {
-                airline.IsActive = false;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            airline.IsActive = false;
+            flightDbContext.SaveChanges();
+            return "Airline Blocked";
         }
 
-        public bool DeleteFlight(string flightNumber)
+        public string DeleteFlight(Flight flight)
         {
-            var flight = Flights.Where(f => f.FlightNumber == flightNumber).FirstOrDefault();
-            if (flight != null)
-            {
-                Flights.Remove(flight);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+
+            flightDbContext.Flights.Remove(flight);
+            flightDbContext.SaveChanges();
+            return "Flight deleted successfully";
+        }
+        public Flight GetFlightByFlightNumber(string flightNumber)
+        {
+            return flightDbContext.Flights.Where(f => f.FlightNumber == flightNumber).FirstOrDefault();
+        }
+        public Airline GetAirlineById(int airlineId)
+        {
+            return flightDbContext.Airlines.Where(a => a.Id == airlineId).FirstOrDefault();
         }
 
         public List<Airline> GetAllAirlines()
         {
-            return Airlines.ToList();
+            return flightDbContext.Airlines.ToList();
         }
 
         public List<Flight> GetAllFlightsByAirlineId(int airlineId)
         {
-            return Flights.Where(f => f.AirlineId == airlineId).ToList();
+            return  flightDbContext.Flights.Where(f => f.AirlineId == airlineId).ToList();
 
         }
 
@@ -90,7 +78,7 @@ namespace FlightServiceAPI.Repository
             {
                 daySearch = FlightScheduleDays.WeekEnds;
             }
-            var flights = Flights.Where((f => f.Departure == search.From && f.Destination == search.To && (f.ScheduleDays == FlightScheduleDays.Daily || f.ScheduleDays == daySearch))).ToList();
+            var flights = flightDbContext.Flights.Where((f => f.Departure == search.From && f.Destination == search.To && (f.ScheduleDays == FlightScheduleDays.Daily || f.ScheduleDays == daySearch))).ToList();
 
             return flights;
         }

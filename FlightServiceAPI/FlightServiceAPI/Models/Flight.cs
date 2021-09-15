@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace FlightServiceAPI.Models
 {
     public enum FlightScheduleDays
     {
-        Daily,
-        WeekDays,
-        WeekEnds
+        Daily=0,
+        WeekDays=1,
+        WeekEnds=2
     }
     public class Flight
     {
@@ -29,6 +27,7 @@ namespace FlightServiceAPI.Models
         public int NumberOfEconomyClassSeats { get; set; }
         public double TicketCost { get; set; }
 
+        [JsonIgnore]
         public Airline Airline { get; set; }
 
     }

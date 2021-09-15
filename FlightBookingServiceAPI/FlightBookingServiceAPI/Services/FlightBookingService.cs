@@ -1,10 +1,9 @@
 ﻿using FlightBookingServiceAPI.DTO;
+using FlightBookingServiceAPI.Exceptions;
 using FlightBookingServiceAPI.Models;
 using FlightBookingServiceAPI.Repository;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FlightBookingServiceAPI.Services
 {
@@ -16,7 +15,7 @@ namespace FlightBookingServiceAPI.Services
         {
             flightBookingRepository = _flightBookingRepository;
         }
-        public bool BookTickets(BookingDTO bookingDTO)
+        public string BookTickets(BookingDTO bookingDTO)
         {
             string pnr = GeneratePNR();
             Booking booking = new Booking() { PNR = pnr,FlightNumber=bookingDTO.FlightNumber,Email = bookingDTO.Email,
@@ -37,12 +36,53 @@ namespace FlightBookingServiceAPI.Services
 
         public string CancelAllTickets(string pnr)
         {
-            return flightBookingRepository.CancelAllTickets(pnr);
+            var booking = flightBookingRepository.GetBookingByPNR(pnr);
+            if (booking != null)
+            {
+                var day = booking.DepartureDate - DateTime.Now;
+                if (day.TotalHours >= 24)
+                {
+                    var passengers = flightBookingRepository.GetTicketDetailsOnPNR(pnr);
+                    return flightBookingRepository.CancelAllTickets(passengers, booking);
+                }
+                else
+                {
+                    throw new CancelTicketTimeLimitException("Cannot Cancel the ticket when departure time is less than 24 hours.");
+                }
+            }
+            else
+            {
+                throw new TicketDetailsNotFoundException($"Ticket Details with PNR : {pnr} not found");
+            }     
         }
 
         public string CancelSingleTicket(CancelSingleTicketDTO cancelSingleTicket)
         {
-            return flightBookingRepository.CancelSingleTicket(cancelSingleTicket);
+            var booking = flightBookingRepository.GetBookingByPNR(cancelSingleTicket.PNR);
+            if (booking != null)
+            {
+                var day = booking.DepartureDate - DateTime.Now;
+                if (day.TotalHours >= 24)
+                {
+                    var passengerDetail = flightBookingRepository.GetPassengerDetail(cancelSingleTicket);
+                    if (passengerDetail != null)
+                    {
+                        return flightBookingRepository.CancelSingleTicket(passengerDetail, booking);
+                    }
+                    else
+                    {
+                        throw new TicketDetailsNotFoundException($"Ticket Details with Email : {cancelSingleTicket.Email} not found");
+                    }
+                }
+                else
+                {
+                    throw new CancelTicketTimeLimitException("Cannot Cancel the ticket when departure time is less than 24 hours.");
+                }
+            }
+            else
+            {
+                throw new TicketDetailsNotFoundException($"Ticket Details with PNR : {cancelSingleTicket.PNR} not found");
+            }
         }
 
         public List<Booking> GetBookingHistoryOfUser(string email)
@@ -69,5 +109,12 @@ namespace FlightBookingServiceAPI.Services
         {
             return flightBookingRepository.GetAllPassengers();
         }
+
+        public List<string> GetBookedTicketsSeatNumber(BookedTicketsDTO bookedTickets)
+        {
+            var pnrs = flightBookingRepository.GetBookedTicketsPNR(bookedTickets);
+            return flightBookingRepository.GetBookedTicketsSeatNumbers(pnrs);
+        }
+
     }
 }

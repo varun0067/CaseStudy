@@ -13,30 +13,22 @@ namespace AuthenticationServiceAPI.Repository
         {
             userDBContext = _userDbContext;
         }
-        public User Login(UserLoginDTO userLoginDTO)
+
+        public User CheckUserAlreadyExists(string email)
         {
-            var User = userDBContext.Users.Where(u => u.Email == userLoginDTO.Email && u.Password == userLoginDTO.Password).FirstOrDefault();
-            if (User != null)
-            {
-                return (User);
-            }
-            else
-                return null;
+            return userDBContext.Users.Where(u => u.Email == email).FirstOrDefault();
         }
 
-        public bool Register(User RegisterUser)
+        public User Login(UserLoginDTO userLoginDTO)
         {
-            var User= userDBContext.Users.Where(u => u.Email == RegisterUser.Email).FirstOrDefault();
-            if (User == null)
-            {
-                userDBContext.Users.Add(RegisterUser);
-                userDBContext.SaveChanges();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return userDBContext.Users.Where(u => u.Email == userLoginDTO.Email && u.Password == userLoginDTO.Password).FirstOrDefault();
+        }
+
+        public string Register(User RegisterUser)
+        {
+            userDBContext.Users.Add(RegisterUser);
+            userDBContext.SaveChanges();
+            return "User Registered Successfully";
         }
     }
 }

@@ -1,103 +1,101 @@
-﻿using FlightBookingServiceAPI.DTO;
+﻿using FlightBookingServiceAPI.Context;
+using FlightBookingServiceAPI.DTO;
 using FlightBookingServiceAPI.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace FlightBookingServiceAPI.Repository
 {
     public class FlightBookingRepository : IFlightBookingRepository
     {
-        public List<Booking> Bookings;
-        public List<PassengerDetail> PassengerDetails;
+        private readonly FlightBookingDbContext flightBookingDbContext;
 
-        public FlightBookingRepository()
+        public FlightBookingRepository(FlightBookingDbContext _flightBookingDbContext)
         {
-            Bookings = new List<Booking>();
-            PassengerDetails = new List<PassengerDetail>();
+            flightBookingDbContext = _flightBookingDbContext;
         }
 
-        public bool BookTickets(Booking booking, List<PassengerDetail> passengerDetailsInfo)
+        public string BookTickets(Booking booking, List<PassengerDetail> passengerDetailsInfo)
         {
-            Bookings.Add(booking);
-            PassengerDetails.AddRange(passengerDetailsInfo);
-            return true;
+            flightBookingDbContext.Bookings.Add(booking);
+            flightBookingDbContext.PassengerDetails.AddRange(passengerDetailsInfo);
+            flightBookingDbContext.SaveChanges();
+            return "Tickets Successfully Booked";
         }
 
-        public string CancelAllTickets(string pnr)
+        public string CancelAllTickets(List<PassengerDetail> passengers,Booking booking)
         {
-            var booking = Bookings.Where(b => b.PNR == pnr).FirstOrDefault();
-
-            var day = booking.DepartureDate - DateTime.Now;
-            if (day.TotalHours >= 24)
+            foreach (PassengerDetail passenger in passengers)
             {
-                var passengers = PassengerDetails.Where(p => p.PNR == pnr).ToList();
-                foreach (PassengerDetail passenger in passengers)
-                {
-                    PassengerDetails.Remove(passenger);
-                }
-                Bookings.Remove(booking);
-                return "Tickets Canceled Successfully";
+                flightBookingDbContext.PassengerDetails.Remove(passenger);
             }
-            else
-            {
-                return "Cannot Cancel the ticket when departure time is less than 24 hours.";
-            }
-           
+            flightBookingDbContext.Bookings.Remove(booking);
+            flightBookingDbContext.SaveChanges();
+            return "Tickets Canceled Successfully";
         }
 
-        public string CancelSingleTicket(CancelSingleTicketDTO cancelSingleTicket)
+        public string CancelSingleTicket(PassengerDetail passenger, Booking booking)
         {
-            var booking = Bookings.Where(b => b.PNR == cancelSingleTicket.PNR).FirstOrDefault();
-            if (booking != null)
-            {
-                var day = booking.DepartureDate - DateTime.Now;
-                if (day.TotalHours >= 24)
-                {
-                    var passengerDetail = PassengerDetails.Where(p => p.Email == cancelSingleTicket.Email && p.PNR == cancelSingleTicket.PNR).FirstOrDefault();
-                    if (passengerDetail != null)
-                    {
-                        PassengerDetails.Remove(passengerDetail);
-                        booking.NumberOfTickets -= 1;
-                        return "Succesfully Cancelled";
-                    }
-                    else
-                    {
-                        return "No ticket details found.";
-                    }
-                }
-                else
-                {
-                    return "Cannot Cancel the ticket when departure time is less than 24 hours.";
-                    ;
-                }
-            }
-            else
-            {
-                return "No ticket details found.";
-            }
+
+            flightBookingDbContext.PassengerDetails.Remove(passenger);
+            booking.NumberOfTickets -= 1;
+            flightBookingDbContext.SaveChanges();
+            return "Succesfully Cancelled";
 
         }
 
         public List<Booking> GetAllBooking()
         {
-            return Bookings.ToList();
+            return flightBookingDbContext.Bookings.ToList();
         }
 
         public List<PassengerDetail> GetAllPassengers()
         {
-            return PassengerDetails.ToList();
+            return flightBookingDbContext.PassengerDetails.ToList();
         }
 
         public List<Booking> GetBookingHistoryOfUser(string email)
         {
-            return Bookings.Where(b => b.Email == email).ToList();
+            return flightBookingDbContext.Bookings.Where(b => b.Email == email).ToList();
         }
 
         public List<PassengerDetail> GetTicketDetailsOnPNR(string pnr)
         {
-            return PassengerDetails.Where(p => p.PNR == pnr).ToList();
+            return flightBookingDbContext.PassengerDetails.Where(p => p.PNR == pnr).ToList();
+        }
+
+        public List<string> GetBookedTicketsPNR(BookedTicketsDTO bookedTickets)
+        {
+            var bookedPNRs = from b in flightBookingDbContext.Bookings
+                             where (b.DepartureDate == bookedTickets.DepartureDate && b.FlightNumber == bookedTickets.FlightNumber)
+                             select (b.PNR);
+
+            return bookedPNRs.ToList();
+        }
+
+        public List<string> GetBookedTicketsSeatNumbers(List<string> pnrs)
+        {
+            List<string> bookedSeats = new List<string>();
+            foreach (string pnr in pnrs)
+            {
+                var seats = from p in flightBookingDbContext.PassengerDetails
+                            where p.PNR == pnr
+                            select (p.SeatNumber);
+
+                bookedSeats.AddRange(seats);
+            }
+
+            return bookedSeats;
+        }
+
+        public Booking GetBookingByPNR(string pnr)
+        {
+            return flightBookingDbContext.Bookings.Where(b => b.PNR == pnr).FirstOrDefault();
+        }
+
+        public PassengerDetail GetPassengerDetail(CancelSingleTicketDTO cancelSingleTicket)
+        {
+            return flightBookingDbContext.PassengerDetails.Where(p => p.Email == cancelSingleTicket.Email && p.PNR == cancelSingleTicket.PNR).FirstOrDefault();
         }
     }
 }

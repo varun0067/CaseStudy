@@ -37,7 +37,7 @@ namespace AuthenticationServiceAPI.Services
                 expires: DateTime.UtcNow.AddMinutes(15)
                 );
 
-            var userJwtSecurityTokenHandler = new { token = new JwtSecurityTokenHandler().WriteToken(userJwtSecurityToken) ,email=email};
+            var userJwtSecurityTokenHandler = new { token = new JwtSecurityTokenHandler().WriteToken(userJwtSecurityToken) ,emailId=email};
             var jsonTokenObject = JsonConvert.SerializeObject(userJwtSecurityTokenHandler);
             return jsonTokenObject;
         }
