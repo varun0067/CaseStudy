@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthenticationServiceAPI.Migrations
 {
     [DbContext(typeof(UserDBContext))]
-    [Migration("20210915061807_InitialDb")]
-    partial class InitialDb
+    [Migration("20210919032949_UserDb")]
+    partial class UserDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,6 +24,9 @@ namespace AuthenticationServiceAPI.Migrations
                 {
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("Admin")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Age")
                         .HasColumnType("int");

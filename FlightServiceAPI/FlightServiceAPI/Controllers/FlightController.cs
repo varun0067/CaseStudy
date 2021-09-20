@@ -10,7 +10,7 @@ namespace FlightServiceAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [ExceptionHandler]
-    //[Authorize]
+    [Authorize(Roles ="Admin")]
     public class FlightController : ControllerBase
     {
         private readonly IFightService flightService;
@@ -63,6 +63,8 @@ namespace FlightServiceAPI.Controllers
         {
             return Ok(flightService.SearchFlight(search));
         }
+
+        [AllowAnonymous]
         [HttpPost("getAvailableTickets")]
         public ActionResult GetAvailableTickets(FlightAvailableTicketsDTO flightAvailable)
         {

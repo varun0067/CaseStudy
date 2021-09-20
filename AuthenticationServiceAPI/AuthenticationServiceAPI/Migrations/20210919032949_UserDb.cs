@@ -2,7 +2,7 @@
 
 namespace AuthenticationServiceAPI.Migrations
 {
-    public partial class InitialDb : Migration
+    public partial class UserDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -15,7 +15,8 @@ namespace AuthenticationServiceAPI.Migrations
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Age = table.Column<int>(type: "int", nullable: false),
-                    Mobile = table.Column<long>(type: "bigint", nullable: false)
+                    Mobile = table.Column<long>(type: "bigint", nullable: false),
+                    Admin = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

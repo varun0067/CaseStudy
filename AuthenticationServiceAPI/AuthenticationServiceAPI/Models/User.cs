@@ -13,6 +13,7 @@ namespace AuthenticationServiceAPI.Models
         public string Gender { get; set; }
         public int Age { get; set; }
         public long Mobile { get; set; }
+        public bool Admin { get; set; }
         #endregion
 
     }

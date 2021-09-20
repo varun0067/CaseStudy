@@ -29,7 +29,7 @@ namespace AuthenticationServiceAPI.Controllers
         public ActionResult Login([FromBody] UserLoginDTO userLoginDTO)
         {
             var user = authenticationService.Login(userLoginDTO);
-            return Ok(tokenService.GenerateToken(user.Email, user.Password));
+            return Ok(tokenService.GenerateToken(user.Email, user.Password,user.Admin));
 
         }
 

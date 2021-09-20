@@ -17,10 +17,17 @@ namespace AuthenticationServiceAPI.Services
         {
             configuration = _configuration;
         }
-        public string GenerateToken(string email, string password)
+        public string GenerateToken(string email, string password,bool admin)
         {
+            string role;
+            if (admin)
+                role = "Admin";
+            else
+                role = "User";
+
             var claims = new List<Claim>
             {
+                new Claim(ClaimTypes.Role,role),
                 new Claim("EmailId", email),
                 new Claim("Password",password)
             };

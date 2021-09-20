@@ -9,7 +9,7 @@ namespace FlightBookingServiceAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [ExceptionHandler]
-    //[Authorize]
+    [Authorize(Roles ="User")]
     public class FlightBookingController : ControllerBase
     {
         private readonly IFlightBookingService flightBookingService;
@@ -56,6 +56,7 @@ namespace FlightBookingServiceAPI.Controllers
         {
             return Ok(flightBookingService.GetBookingHistoryOfUser(email));
         }
+        [AllowAnonymous]
         [HttpPost("GetBookedSeats")]
         public ActionResult GetBookedSeats(BookedTicketsDTO bookedTickets)
         {
